@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""One external locker for keyboard, logind, idle and shell menu requests."""
+import fcntl
+import logging
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+
+
+def run(args):
+    return subprocess.run(args, text=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, timeout=10)
+
+
+def session_path():
+    # UWSM children may have no XDG_SESSION_ID, or inherit an old one.
+    current = run(['/usr/bin/loginctl', 'show-user', str(os.getuid()),
+                   '--property=Display', '--value'])
+    sid = current.stdout.strip()
+    if current.returncode or not sid:
+        return None
+    owner = run(['/usr/bin/loginctl', 'show-session', sid,
+                 '--property=User', '--value'])
+    if owner.returncode or owner.stdout.strip() != str(os.getuid()):
+        return None
+    result = run(['/usr/bin/busctl', '--system', 'call',
+                  'org.freedesktop.login1', '/org/freedesktop/login1',
+                  'org.freedesktop.login1.Manager', 'GetSession', 's', sid])
+    words = shlex.split(result.stdout)
+    if result.returncode == 0 and len(words) == 2 and words[0] == 'o':
+        return words[1]
+    return None
+
+
+def locked_hint(path, locked):
+    if path is None:
+        return
+    try:
+        result = run(['/usr/bin/busctl', '--system', 'call',
+                      'org.freedesktop.login1', path,
+                      'org.freedesktop.login1.Session', 'SetLockedHint',
+                      'b', 'true' if locked else 'false'])
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        logging.warning('Could not synchronize LockedHint: %s', exc)
+        return
+    if result.returncode:
+        logging.warning('Could not synchronize LockedHint: %s', result.stderr.strip())
+
+
+def main():
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}'))
+    with (runtime / 'coastal-lock.lock').open('a') as guard:
+        try:
+            fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return 0
+        # Also respect a locker started manually outside this wrapper.
+        if run(['/usr/bin/pgrep', '-u', str(os.getuid()), '-x', 'hyprlock']).returncode == 0:
+            return 0
+        try:
+            path = session_path()
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            # Metadata trouble must never prevent the real screen lock.
+            logging.warning('Could not resolve logind session: %s', exc)
+            path = None
+        locked_hint(path, True)
+        logging.info('Starting hyprlock for %s', path or 'current Wayland display')
+        # Stay alive until the real locker exits after authentication.
+        result = subprocess.run(['/usr/bin/hyprlock', '--immediate-render'])
+        if result.returncode == 0:
+            locked_hint(path, False)
+            logging.info('hyprlock completed; LockedHint cleared')
+        else:
+            # Never advertise an unlocked session after a locker failure.
+            logging.error('hyprlock failed with code %s; leaving LockedHint set', result.returncode)
+        return result.returncode
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='coastal-lock: %(message)s')
+    try:
+        sys.exit(main())
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        logging.error('%s', exc)
+        sys.exit(1)

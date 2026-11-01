@@ -1,0 +1,14 @@
+@theme "default"
+* { background: #202c36; foreground: #e9e5e0; selected-normal-background: #3d6570; selected-normal-foreground: #c2e6e1; normal-background: #202c36; normal-foreground: #e9e5e0; alternate-normal-background: #202c36; alternate-normal-foreground: #e9e5e0; border-color: #617585; separatorcolor: transparent; }
+window { width: 620px; background-color: #202c36ee; border: 1px; border-color: #617585; border-radius: 18px; padding: 18px; }
+mainbox { spacing: 12px; background-color: transparent; }
+inputbar { padding: 12px; background-color: #34434e; border-radius: 10px; }
+entry { text-color: #e9e5e0; background-color: transparent; }
+prompt { text-color: #83c7c5; background-color: transparent; }
+listview { lines: 8; spacing: 5px; background-color: transparent; }
+element { padding: 10px; border-radius: 9px; background-color: transparent; }
+element selected { background-color: #3d6570; }
+element-text { text-color: #e9e5e0; background-color: transparent; }
+element-text selected { text-color: #c2e6e1; }
+element-icon { size: 26px; margin: 0 10px 0 0; background-color: transparent; }
+textbox { text-color: #e9e5e0; background-color: transparent; }

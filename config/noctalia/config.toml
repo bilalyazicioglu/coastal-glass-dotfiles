@@ -1,0 +1,174 @@
+# Coastal Glass: compact floating bar, edge-reveal dock, and translucent panels.
+
+[theme]
+mode = "dark"
+source = "custom"
+custom_palette = "CoastalGlass"
+
+[shell]
+avatar_path = "__HOME__/.config/noctalia/arch-logo-avatar.svg"
+
+[control_center]
+circular_avatar = true
+
+[bar.default]
+position = "top"
+thickness = 32
+background_opacity = 0.70
+compositor_blur = true
+radius = 13
+margin_ends = 10
+margin_edge = 10
+padding = 12
+widget_spacing = 5
+shadow = true
+border = "primary"
+border_width = 0.6
+start = ["launcher", "workspaces"]
+center = ["clock"]
+end = ["media", "tray", "notifications", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+
+[dock]
+enabled = true
+position = "bottom"
+icon_size = 42
+main_axis_padding = 14
+cross_axis_padding = 7
+item_spacing = 5
+background_opacity = 0.68
+compositor_blur = true
+border = "primary"
+border_width = 1.0
+radius = 16
+margin_edge = 10
+margin_ends = 0
+shadow = true
+show_running = true
+auto_hide = true
+reserve_space = false
+magnification = true
+magnification_scale = 1.32
+launcher_position = "none"
+show_dots = true
+show_instance_count = false
+pinned = ["firefox", "com.mitchellh.ghostty", "org.kde.dolphin", "spotify-launcher"]
+
+[shell.panel]
+transparency_mode = "glass"
+borders = true
+border_color = "primary"
+border_width = 1.1
+shadow = true
+control_center_placement = "floating"
+control_center_position = "auto"
+
+[wallpaper]
+enabled = false
+
+[notification]
+enable_daemon = true
+background_opacity = 0.88
+border = true
+border_color = "outline_variant"
+border_width = 1.0
+offset_y = 10
+
+[audio]
+enable_sounds = false
+
+# A restrained peach accent drawn from the wallpaper palette.
+[widget.media]
+color = "primary"
+
+[widget.battery]
+color = "primary"
+
+# Floating desktop widgets: palette-tinted glass, kept behind application windows.
+[desktop_widgets]
+enabled = true
+
+[desktop_widgets.widget.desktop-clock]
+type = "clock"
+output = "eDP-1"
+cx = 1620.0
+cy = 180.0
+box_width = 0.0
+box_height = 0.0
+rotation = 0.0
+
+[desktop_widgets.widget.desktop-clock.settings]
+clock_style = "digital"
+format = "{:%H:%M}"
+color = "primary"
+shadow = true
+background = true
+background_color = "surface_container"
+background_opacity = 0.22
+background_radius = 18.0
+background_padding = 16.0
+
+[desktop_widgets.widget.desktop-calendar]
+type = "calendar"
+output = "eDP-1"
+cx = 1640.0
+cy = 430.0
+box_width = 320.0
+box_height = 300.0
+rotation = 0.0
+
+[desktop_widgets.widget.desktop-calendar.settings]
+show_events = false
+show_week_numbers = false
+background = true
+background_color = "surface_container"
+background_opacity = 0.18
+background_radius = 18.0
+background_padding = 14.0
+
+[desktop_widgets.widget.desktop-media]
+type = "media_player"
+output = "eDP-1"
+cx = 1630.0
+cy = 850.0
+box_width = 380.0
+box_height = 150.0
+rotation = 0.0
+
+[desktop_widgets.widget.desktop-media.settings]
+layout = "horizontal"
+color = "on_surface"
+shadow = true
+hide_when_no_media = true
+album_art_background = true
+album_art_blur = 24
+audio_visualizer = false
+background = true
+background_color = "surface_container"
+background_opacity = 0.2
+background_radius = 18.0
+background_padding = 12.0
+
+
+
+# One locker: hypridle + coastal-lock + hyprlock. Noctalia's native locker
+# raced logind Lock requests and left the bar/dock/launcher logically locked.
+[lockscreen]
+enabled = false
+lock_before_suspend = false
+
+# Explicitly retain disabled native idle actions; hypridle owns these timers.
+[idle.behavior.lock]
+enabled = false
+[idle.behavior.screen-off]
+enabled = false
+[idle.behavior.lock-and-suspend]
+enabled = false
+
+[shell.session]
+actions = [
+  { action = "command", label = "Ekranı kilitle", glyph = "lock", command = "__HOME__/.local/bin/coastal-lock", shortcut = "1" },
+  { action = "logout", shortcut = "2" },
+  { action = "suspend", label = "Uyku", shortcut = "3" },
+  { action = "reboot", shortcut = "4" },
+  { action = "shutdown", shortcut = "5", variant = "destructive" },
+]

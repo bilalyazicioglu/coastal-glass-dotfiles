@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+wallpaper="$HOME/.local/share/backgrounds/coastal-glass/coastal-drive-main.png"
+[[ -f "$wallpaper" ]] || { printf '%s\n' 'Copy the Coastal Drive desktop wallpaper to the documented location.' >&2; exit 1; }
+if ! awww query >/dev/null 2>&1; then
+ awww-daemon --no-cache &
+ for attempt in {1..40}; do
+  awww query >/dev/null 2>&1 && break
+  sleep 0.1
+ done
+fi
+exec awww img "$wallpaper" --transition-type none
